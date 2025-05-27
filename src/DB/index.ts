@@ -2,7 +2,8 @@ import { UserModel } from "../modules/user/user.model";
 import { hashPassword } from "../modules/user/user.service";
 
 const admin = {
-  name: "MD Admin",
+  firstName: "Admin",
+  lastName: "User",
   email: "admin@gmail.com",
   password: "1qazxsw2",
   role: "admin",

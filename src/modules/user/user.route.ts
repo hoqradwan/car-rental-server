@@ -22,7 +22,6 @@ import { adminMiddleware } from "../../middlewares/auth";
 const router = express.Router();
 router.post(
   "/register",
-
   registerUser,
 );
 router.post("/login", loginUser);

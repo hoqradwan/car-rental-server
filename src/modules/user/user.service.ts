@@ -10,27 +10,35 @@ import {
   Nodemailer_GMAIL,
   Nodemailer_GMAIL_PASSWORD,
 } from "../../config";
+import { UserProfile } from "../UserProfile/userProfile.model";
 
 export const createUser = async ({
-  name,
+  firstName,
+  lastName,
   email,
   hashedPassword,
 }: {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   hashedPassword: string;
 }): Promise<{ createdUser: IUser }> => {
   const createdUser = await UserModel.create({
-    name,
+    firstName,
+    lastName,
     email,
     password: hashedPassword,
   });
+  console.log("Created User:", createdUser);
+  await UserProfile.create({
+    user: createdUser._id,
+  })
   return { createdUser };
 };
 
-export const findUserByEmail = async (email: string): Promise<IUser | null> => {
-  return UserModel.findOne({ email });
-};
+// export const findUserByEmail = async (email: string): Promise<IUser | null> => {
+//   return UserModel.findOne({ email });
+// };
 
 export const findUserById = async (id: string): Promise<IUser | null> => {
   return UserModel.findById(id);
@@ -48,7 +56,6 @@ export const getUserList = async (
   skip: number,
   limit: number,
   date?: string,
-  name?: string,
   email?: string,
 ): Promise<{ users: IUser[]; totalUsers: number; totalPages: number }> => {
   //const query: any = { isDeleted: { $ne: true } }
@@ -70,9 +77,7 @@ export const getUserList = async (
     query.createdAt = { $gte: startDate, $lte: endDate };
   }
 
-  if (name) {
-    query.name = { $regex: name, $options: "i" };
-  }
+ 
 
   if (email) {
     query.email = { $regex: email, $options: "i" };

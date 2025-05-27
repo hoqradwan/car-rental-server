@@ -8,7 +8,6 @@ import sendError from "../../utils/sendError";
 import sendResponse from "../../utils/sendResponse";
 import {
   createUser,
-  findUserByEmail,
   findUserById,
   generateOTP,
   generateToken,
@@ -24,7 +23,6 @@ import {
 
 import { OTPModel, PendingUserModel, UserModel } from "./user.model";
 
-import { validateUserInput } from "./user.validation";
 import { IPendingUser } from "./user.interface";
 import {
   JWT_SECRET_KEY,
@@ -35,12 +33,7 @@ import { emitNotification } from "../../utils/socket";
 import httpStatus from "http-status";
 
 export const registerUser = catchAsync(async (req: Request, res: Response) => {
-  const { name, email, password, confirmPassword } = req.body;
-
-  const validationError = validateUserInput(name, email, password);
-  if (validationError) {
-    return sendError(res, httpStatus.BAD_REQUEST, validationError);
-  }
+  const { firstName, lastName, email, password, confirmPassword } = req.body;
 
   if (password !== confirmPassword) {
     return sendError(res, httpStatus.BAD_REQUEST, {
@@ -48,7 +41,7 @@ export const registerUser = catchAsync(async (req: Request, res: Response) => {
     });
   }
 
-  const isUserRegistered = await findUserByEmail(email);
+  const isUserRegistered = await UserModel.findOne({ email });;
   if (isUserRegistered) {
     return sendError(res, httpStatus.BAD_REQUEST, {
       message: "You already have an account.",
@@ -58,7 +51,8 @@ export const registerUser = catchAsync(async (req: Request, res: Response) => {
   await PendingUserModel.findOneAndUpdate(
     { email },
     {
-      name,
+      firstName,
+      lastName,
       email,
       password,
       confirmPassword,
@@ -128,7 +122,7 @@ export const resendOTP = catchAsync(async (req: Request, res: Response) => {
 export const loginUser = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  const user = await findUserByEmail(email);
+  const user = await UserModel.findOne({email});
 
   if (!user) {
     return sendError(res, httpStatus.NOT_FOUND, {
@@ -154,16 +148,8 @@ export const loginUser = catchAsync(async (req: Request, res: Response) => {
 
   const token = generateToken({
     id: user._id,
-    name: user.name,
     email: user.email,
     role: user.role,
-    image: user?.image,
-    age: user?.age,
-    gender: user?.gender,
-    bio: user?.bio,
-    about: user?.about,
-    address: user?.address,
-    phone: user?.phone,
   });
 
   sendResponse(res, {
@@ -173,16 +159,10 @@ export const loginUser = catchAsync(async (req: Request, res: Response) => {
     data: {
       user: {
         id: user._id,
-        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         role: user.role,
-        image: user?.image,
-        age: user?.age,
-        gender: user?.gender,
-        bio: user?.bio,
-        about: user?.about,
-        address: user?.address,
-        phone: user?.phone,
       },
       token,
     },
@@ -199,7 +179,7 @@ export const forgotPassword = catchAsync(
       });
     }
 
-    const user = await findUserByEmail(email);
+    const user = await UserModel.findOne(email);
     if (!user) {
       return sendError(res, httpStatus.NOT_FOUND, {
         message: "This account does not exist.",
@@ -263,8 +243,8 @@ export const forgotPassword = catchAsync(
 );
 
 export const resetPassword = catchAsync(async (req: Request, res: Response) => {
- 
-const email = req.query.email as string;
+
+  const email = req.query.email as string;
 
   const { password, confirmPassword } = req.body;
 
@@ -281,7 +261,7 @@ const email = req.query.email as string;
   }
 
 
-  const user = await findUserByEmail(email);
+  const user = await UserModel.findOne({email});
 
   if (!user) {
     return sendError(res, httpStatus.NOT_FOUND, {
@@ -325,20 +305,21 @@ export const verifyOTP = catchAsync(async (req: Request, res: Response) => {
     });
   }
 
-  const { name, password } = (await getUserRegistrationDetails(
+  const { firstName,lastName, password } = (await getUserRegistrationDetails(
     email,
   )) as IPendingUser;
   //console.log(objective, "objective from controller");
   const hashedPassword = await hashPassword(password);
 
   const { createdUser } = await createUser({
-    name,
+    firstName,
+    lastName,
     email,
     hashedPassword,
   });
 
   const userMsg = "Welcome to LikeMine_App.";
-  const adminMsg = `${name} has successfully registered.`;
+  const adminMsg = `${firstName} has successfully registered.`;
 
   await emitNotification({
     userId: createdUser._id as string,
@@ -414,7 +395,7 @@ export const changePassword = catchAsync(
     };
     const email = decoded.email;
 
-    const user = await findUserByEmail(email);
+    const user = await UserModel.findOne({email});
     if (!user) {
       return sendError(res, httpStatus.NOT_FOUND, {
         message: "User not found.",
@@ -568,7 +549,6 @@ export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
     skip,
     limit,
     date,
-    name,
     email,
   );
   // Pagination logic for prevPage and nextPage
@@ -693,7 +673,7 @@ export const adminloginUser = catchAsync(
     //   });
     // }
 
-    const user = await findUserByEmail(email);
+    const user = await UserModel.findOne({email});
     if (!user) {
       return sendError(res, httpStatus.NOT_FOUND, {
         message:
@@ -732,11 +712,10 @@ export const adminloginUser = catchAsync(
     // Generate new token for the logged-in user
     const newToken = generateToken({
       id: user._id,
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       role: user.role,
-      image: user?.image,
-      // lang: lang,
     });
 
     // Send the response
@@ -749,10 +728,10 @@ export const adminloginUser = catchAsync(
       data: {
         user: {
           id: user._id,
-          name: user.name,
+          firstName: user.firstName,
+          lastName: user.lastName,
           email: user.email,
           role: user.role,
-          image: user?.image,
         },
         token: newToken,
       },

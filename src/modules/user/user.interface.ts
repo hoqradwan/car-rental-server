@@ -1,34 +1,20 @@
 import { Document } from "mongoose";
 
 export type IPendingUser = {
+  firstName: string;
+  lastName: string;
   email: string;
-  name: string;
   password: string;
   confirmPassword: string;
   role: "user" | "admin";
 } & Document;
 
 export type IUser = {
-  name?: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password?: string;
-  confirmPassword?: string;
-  phone?: string;
-  address?: string;
-  image?: {
-    publicFileURL: string;
-    path: string;
-  };
   role: "admin" | "user";
-  status: "active" | "blocked";
-  age: string;
-  gender: string;
-  about: string;
-  bio: string;
-
-  cuponCode: string;
-  expiryDate: Date | null;
-  activeDate: Date | null;
   isDeleted: boolean;
 } & Document;
 
