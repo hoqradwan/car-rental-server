@@ -29,6 +29,7 @@ const ALLOWED_FILE_TYPES = [
   ".svg",
 ];
 
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, UPLOAD_PATH);
@@ -57,6 +58,7 @@ const fileFilter = (
 ) => {
   let extName = path.extname(file.originalname).toLocaleLowerCase();
   const isAllowedFileType = ALLOWED_FILE_TYPES.includes(extName);
+  console.log("isAllowedFileType: ", isAllowedFileType);
   if (!isAllowedFileType) {
     return cb(createHttpError(400, "File type not allowed"));
   }
