@@ -1,7 +1,7 @@
 import catchAsync from "../../utils/catchAsync";
 import { CustomRequest } from "../../utils/CustomRequest";
 import sendResponse from "../../utils/sendResponse";
-import { addCarIntoDB } from "./car.service";
+import { addCarIntoDB, getCarsFromDB } from "./car.service";
 
 export const addCar = catchAsync(async (req: CustomRequest, res) => {
  
@@ -17,22 +17,14 @@ export const addCar = catchAsync(async (req: CustomRequest, res) => {
     })
 })
 
-/* 
-
-{
-  "make": "Toyota",
-  "model": "Corolla",
-  "color": "Blue",
-  "licensePlate": "ABC1234",
-  "vin": "1HGBH41JXMN109186",
-  "doors": 4,
-  "camera": 1,
-  "bluetooth": 1,
-  "description": "A reliable and fuel-efficient car, perfect for city driving.",
-  "price": 25000,
-  "seats": 5,
-  "tax": 150,
-  "status": "available"
-}
-
-*/
+export const getCars = catchAsync(async (req: CustomRequest, res) => {
+    const { id: userId } = req.user; 
+    const carData = req.query; 
+    const cars = await getCarsFromDB(userId,carData); 
+    return sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Cars retrieved successfully",
+        data: cars,
+    })
+})
