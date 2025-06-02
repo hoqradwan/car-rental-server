@@ -7,7 +7,6 @@ export const addCar = catchAsync(async (req: CustomRequest, res) => {
  
     const { id: userId } = req.user; 
     const formattedCarData = JSON.parse(req.body.data);
-    console.log("Formatted Car Data:", formattedCarData);
     const result = await addCarIntoDB(userId, formattedCarData, req.body.image); 
     return sendResponse(res, {
         statusCode: 200,

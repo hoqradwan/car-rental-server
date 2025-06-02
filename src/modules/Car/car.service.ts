@@ -27,7 +27,7 @@ export const getCarsFromDB = async (userId: string, carData: Partial<ICar>) => {
         const cars = await Car.find({ ...searchQuery, status: "available" }).sort({ createdAt: -1 });
         return cars;
     }
-    if (user.role === "admin") {
+    if (user.role === "admin"|| user.role === "employee") {
         const cars = await Car.find(searchQuery).sort({ createdAt: -1 });
         return cars;
     }

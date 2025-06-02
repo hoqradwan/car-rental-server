@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 
-type Role = "user" | "admin" | undefined; // Add more roles as needed
+type Role = "user" | "admin" | "employee" | undefined; // Add more roles as needed
 interface AuthRequest extends Request {
   user?: jwt.JwtPayload | string;
 }

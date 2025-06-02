@@ -46,7 +46,12 @@ const storage = multer.diskStorage({
       extName,
       "",
     )}${extName}`;
-    req.body.image = fileName;
+    // Assign the generated filename to req.body fields based on the fieldname
+    if (file.fieldname === "driverLicense") {
+      req.body.driverLicense = fileName;
+    } else if (file.fieldname === "image") {
+      req.body.image = fileName;
+    }
     cb(null, fileName);
   },
 });

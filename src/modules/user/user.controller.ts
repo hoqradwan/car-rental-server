@@ -33,6 +33,7 @@ import { emitNotification } from "../../utils/socket";
 import httpStatus from "http-status";
 
 export const registerUser = catchAsync(async (req: Request, res: Response) => {
+  console.log("hiting")
   const { firstName, lastName, email, password, confirmPassword } = req.body;
 
   if (password !== confirmPassword) {
