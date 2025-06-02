@@ -5,7 +5,6 @@ import { CustomRequest } from "../../utils/CustomRequest";
 import { addBookingIntoDB, cancelBookingIntoDB, cancelRequestForBookingIntoDB, getAllBookingsFromDB, getMyBookingsFromDB } from "./booking.service";
 
 export const createBooking = catchAsync(async (req: CustomRequest, res: Response) => {
-    console.log(req.body.driverLicense)
     const { id: userId } = req.user; // Extract user ID from the request
     const formattedBookingData = JSON.parse(req.body.data); // Parse booking data from request body
     const result = await addBookingIntoDB(userId, formattedBookingData, req.body.driverLicense); // Call service to add booking into DB

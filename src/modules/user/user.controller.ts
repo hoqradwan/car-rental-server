@@ -11,6 +11,7 @@ import {
   findUserById,
   generateOTP,
   generateToken,
+  getSingleUserFromDB,
   getStoredOTP,
   getUserList,
   getUserRegistrationDetails,
@@ -31,10 +32,10 @@ import {
 } from "../../config";
 import { emitNotification } from "../../utils/socket";
 import httpStatus from "http-status";
+import { CustomRequest } from "../../utils/CustomRequest";
 
 export const registerUser = catchAsync(async (req: Request, res: Response) => {
-  console.log("hiting")
-  const { firstName, lastName, email, password, confirmPassword } = req.body;
+  const { firstName, lastName, email, password, confirmPassword, role } = req.body;
 
   if (password !== confirmPassword) {
     return sendError(res, httpStatus.BAD_REQUEST, {
@@ -55,6 +56,7 @@ export const registerUser = catchAsync(async (req: Request, res: Response) => {
       firstName,
       lastName,
       email,
+      role,
       password,
       confirmPassword,
     },
@@ -123,7 +125,7 @@ export const resendOTP = catchAsync(async (req: Request, res: Response) => {
 export const loginUser = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  const user = await UserModel.findOne({email});
+  const user = await UserModel.findOne({ email });
 
   if (!user) {
     return sendError(res, httpStatus.NOT_FOUND, {
@@ -262,7 +264,7 @@ export const resetPassword = catchAsync(async (req: Request, res: Response) => {
   }
 
 
-  const user = await UserModel.findOne({email});
+  const user = await UserModel.findOne({ email });
 
   if (!user) {
     return sendError(res, httpStatus.NOT_FOUND, {
@@ -306,7 +308,7 @@ export const verifyOTP = catchAsync(async (req: Request, res: Response) => {
     });
   }
 
-  const { firstName,lastName, password } = (await getUserRegistrationDetails(
+  const { firstName, lastName, password, role } = (await getUserRegistrationDetails(
     email,
   )) as IPendingUser;
   //console.log(objective, "objective from controller");
@@ -315,6 +317,7 @@ export const verifyOTP = catchAsync(async (req: Request, res: Response) => {
   const { createdUser } = await createUser({
     firstName,
     lastName,
+    role,
     email,
     hashedPassword,
   });
@@ -396,7 +399,7 @@ export const changePassword = catchAsync(
     };
     const email = decoded.email;
 
-    const user = await UserModel.findOne({email});
+    const user = await UserModel.findOne({ email });
     if (!user) {
       return sendError(res, httpStatus.NOT_FOUND, {
         message: "User not found.",
@@ -510,30 +513,8 @@ export const getSelfInfo = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return sendError(res, httpStatus.UNAUTHORIZED, {
-      message: "No token provided or invalid format.",
-    });
-  }
-  const token = authHeader.split(" ")[1];
-  const decoded = jwt.verify(token, JWT_SECRET_KEY as string) as { id: string };
-  const adminId = decoded.id;
-
-  // Find the user by userId
-  const user = await findUserById(adminId);
-  if (!user) {
-    return sendError(res, httpStatus.NOT_FOUND, {
-      message: "This admin account doesnot exist.",
-    });
-  }
-  // Check if the user is an admin
-  if (user.role !== "admin") {
-    return sendError(res, httpStatus.FORBIDDEN, {
-      message: "Only admins can access the user list.",
-    });
-  }
+export const getAllUsers = catchAsync(async (req: CustomRequest, res: Response) => {
+  console.log(req.user)
   // Pagination parameters
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
@@ -546,7 +527,6 @@ export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
 
   // Get users with pagination
   const { users, totalUsers, totalPages } = await getUserList(
-    adminId,
     skip,
     limit,
     date,
@@ -572,6 +552,18 @@ export const getAllUsers = catchAsync(async (req: Request, res: Response) => {
     },
   });
 });
+
+export const getUserById = catchAsync(async (req: CustomRequest, res: Response) => {
+  const { id: user } = req.user;
+  const { userId } = req.params;
+  const result = await getSingleUserFromDB(user, userId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User retrieved successfully",
+    data: result,
+  })
+})
 
 export const BlockUser = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.body;
@@ -674,7 +666,7 @@ export const adminloginUser = catchAsync(
     //   });
     // }
 
-    const user = await UserModel.findOne({email});
+    const user = await UserModel.findOne({ email });
     if (!user) {
       return sendError(res, httpStatus.NOT_FOUND, {
         message:

@@ -29,7 +29,7 @@ const UserSchema = new Schema<IUser>(
     password: { type: String, trim: true },
     role: {
       type: String,
-      enum: ["admin", "user"],
+      enum: ["admin", "user","employee"],
       default: "user",
     },
     isDeleted: {

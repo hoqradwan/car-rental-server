@@ -15,17 +15,20 @@ import { UserProfile } from "../UserProfile/userProfile.model";
 export const createUser = async ({
   firstName,
   lastName,
+  role,
   email,
   hashedPassword,
 }: {
   firstName: string;
   lastName: string;
+  role: string
   email: string;
   hashedPassword: string;
 }): Promise<{ createdUser: IUser }> => {
   const createdUser = await UserModel.create({
     firstName,
     lastName,
+    role,
     email,
     password: hashedPassword,
   });
@@ -52,7 +55,6 @@ export const updateUserById = async (
 };
 
 export const getUserList = async (
-  adminId: string,
   skip: number,
   limit: number,
   date?: string,
@@ -62,7 +64,7 @@ export const getUserList = async (
   //const query: any = { _id: { $ne: adminId } };
 
   const query: any = {
-    $and: [{ isDeleted: { $ne: true } }, { _id: { $ne: adminId } }],
+    $and: [{ isDeleted: { $ne: true } }, { role: { $nin: ["admin", "employee"] } }],
   };
 
   if (date) {
@@ -77,7 +79,7 @@ export const getUserList = async (
     query.createdAt = { $gte: startDate, $lte: endDate };
   }
 
- 
+
 
   if (email) {
     query.email = { $regex: email, $options: "i" };
@@ -185,3 +187,16 @@ export const changeUserRole = async (
 export const userDelete = async (id: string): Promise<void> => {
   await UserModel.findByIdAndUpdate(id, { isDeleted: true });
 };
+
+export const getSingleUserFromDB = async (user: string, userId :string)=>{
+  const authorityExists = await UserModel.findById(user);
+  if(!authorityExists){
+    throw new Error("no authority found with this id")
+  }
+  const userExists = await UserModel.findById(userId);
+  if(!userExists){
+    throw new Error("User not found")
+  }
+  return userExists;
+
+}

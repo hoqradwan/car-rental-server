@@ -15,6 +15,7 @@ import {
   BlockUser,
   deleteUser,
   adminloginUser,
+  getUserById,
 } from "./user.controller";
 import upload from "../../middlewares/fileUploadNormal";
 import { adminMiddleware } from "../../middlewares/auth";
@@ -35,7 +36,8 @@ router.post("/change-password", changePassword);
 router.post("/update", upload.single("image"), updateUser);
 
 router.get("/my-profile", getSelfInfo);
-router.get("/all-user", adminMiddleware("admin"), getAllUsers);
+router.get("/all", adminMiddleware("admin","employee"), getAllUsers);
+router.get("/:userId", adminMiddleware("admin","employee"), getUserById);
 router.post("/block-user", adminMiddleware("admin"), BlockUser);
 
 router.post("/delete", adminMiddleware("admin"), deleteUser);

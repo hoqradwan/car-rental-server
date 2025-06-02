@@ -27,13 +27,48 @@ export const getCarsFromDB = async (userId: string, carData: Partial<ICar>) => {
         const cars = await Car.find({ ...searchQuery, status: "available" }).sort({ createdAt: -1 });
         return cars;
     }
-    if (user.role === "admin"|| user.role === "employee") {
+    if (user.role === "admin" || user.role === "employee") {
         const cars = await Car.find(searchQuery).sort({ createdAt: -1 });
         return cars;
     }
 }
 
+export const deleteCarFromDB = async (userId: string, carId: string) => {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+        throw new Error("User not found");
+    }
+    // const car = await Car.findById(carId);
+    // if (!car) {
+    //     throw new Error("Car not found");
+    // }
+    const deletedCar = await Car.findByIdAndDelete(
+        carId
+    )
+    if (!deletedCar) {
+        throw new Error("Car deletion unsuccessful");
+    }
+    return deletedCar
+}
+export const changeCarStatusIntoDB = async (userId: string, carId: string, status: string) => {
+    if(!status){
+        throw new Error("Please provide the status to update");
+    }
+    const user = await UserModel.findById(userId);
+    if (!user) {
+        throw new Error("User not found");
+    }
 
+    const updateCar = await Car.findByIdAndUpdate(
+        carId,
+        { status },
+        { new: true }
+    )
+    if (!updateCar) {
+        throw new Error("Car update unsuccessful");
+    }
+    return updateCar
+}
 /*
 
 

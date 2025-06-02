@@ -1,6 +1,6 @@
 import express from "express";
 import { adminMiddleware } from "../../middlewares/auth";
-import { addCar, getCars } from "./car.controller";
+import { addCar, getCars, deleteCar, changeCarStatus } from "./car.controller";
 import upload from "../../middlewares/fileUploadNormal";
 
 const router = express.Router();
@@ -12,7 +12,15 @@ router.post(
     addCar);
 router.get(
     "/", 
-    adminMiddleware("admin","user"),
+    adminMiddleware("admin","employee","user"),
     getCars);
+router.post(
+    "/:carId", 
+    adminMiddleware("admin","employee"),
+    deleteCar);
+router.post(
+    "/changeStatus/:carId", 
+    adminMiddleware("admin","employee"),
+    changeCarStatus);
 
 export const CarRoutes = router;
