@@ -99,6 +99,26 @@ export const cancelBookingIntoDB = async (userId: string, bookingId: string) => 
     }, { new: true });
     return cancelBooking;
 }
+export const getBookingsByDateFromDB = async(userId : string, date: Date)=>{
+    const user = await UserModel.findById(userId);
+    if(!user){
+        throw new Error("User not found");
+    }
+      const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const bookings = await Booking.find({
+    pickupDate: { $lte: endOfDay },
+    returnDate: { $gte: startOfDay },
+  }).exec();
+  return bookings;
+
+}
+
+
 
 /* 
 // Parse the JSON response body

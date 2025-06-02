@@ -2,7 +2,7 @@ import { Response } from "express";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { CustomRequest } from "../../utils/CustomRequest";
-import { addBookingIntoDB, cancelBookingIntoDB, cancelRequestForBookingIntoDB, getAllBookingsFromDB, getMyBookingsFromDB } from "./booking.service";
+import { addBookingIntoDB, cancelBookingIntoDB, cancelRequestForBookingIntoDB, getAllBookingsFromDB, getBookingsByDateFromDB, getMyBookingsFromDB } from "./booking.service";
 
 export const createBooking = catchAsync(async (req: CustomRequest, res: Response) => {
     const { id: userId } = req.user; // Extract user ID from the request
@@ -54,6 +54,17 @@ export const cancelBooking = catchAsync(async (req: CustomRequest, res: Response
         statusCode: 200,
         success: true,
         message: "Booking cancelled successfully",
+        data: result, // Replace with actual booking data if available
+    });
+})
+export const getBookingsByDate = catchAsync(async (req: CustomRequest, res: Response) => {
+    const { id: userId } = req.user; // Extract user ID from the request
+    const date = new Date(req.body.date);
+    const result = await getBookingsByDateFromDB(userId, date); // Call service to add booking into DB
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Booking by date retrieved successfully",
         data: result, // Replace with actual booking data if available
     });
 })

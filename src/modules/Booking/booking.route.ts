@@ -1,6 +1,6 @@
 import express from "express";
 import { adminMiddleware } from "../../middlewares/auth";
-import { allBookings, createBooking, myBookings,  cancelRequestForBooking, cancelBooking } from "./booking.controller";
+import { allBookings, createBooking, myBookings,  cancelRequestForBooking, cancelBooking, getBookingsByDate } from "./booking.controller";
 import upload from "../../middlewares/fileUploadNormal";
 
 const router = express.Router();
@@ -31,5 +31,6 @@ router.post(
     adminMiddleware("admin","employee"),
     cancelBooking
 );
+router.get("/bookingsByDate",adminMiddleware("admin","employee"),getBookingsByDate)
 
 export const BookingRoutes = router;

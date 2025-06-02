@@ -17,8 +17,6 @@ const BookingSchema = new Schema<IBooking>({
         required: true, 
         enum: ['booked', 'ongoing', 'completed','cancelRequest', 'cancelled'] 
     },
-   
-
 },{
     timestamps: true,
 });
