@@ -11,6 +11,5 @@ export interface IBooking extends Document {
     dob: Date;
     driverLicense: string;
     licenseNo: string;
-    status: "booked" | "ongoing" | "cancelled" | "completed";
-    cancelRequest?: boolean;
+    status: "booked" | "ongoing" | "cancelled" | "cancelRequest" | "completed";
 }

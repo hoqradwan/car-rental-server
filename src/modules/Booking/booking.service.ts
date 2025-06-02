@@ -60,7 +60,7 @@ export const getAllBookingsFromDB = async (userId: string) => {
     const bookings = await Booking.find();
     return bookings;
 }
-export const cancelRequestIntoDB = async (userId: string, bookingId: string) => {
+export const cancelRequestForBookingIntoDB = async (userId: string, bookingId: string) => {
     const user = await UserModel.findById(userId);
     if (!user) {
         throw new Error("User not found");
@@ -80,6 +80,24 @@ export const cancelRequestIntoDB = async (userId: string, bookingId: string) => 
         status: "cancelRequest"
     }, { new: true });
     return cancelRequestForBooking;
+}
+export const cancelBookingIntoDB = async (userId: string, bookingId: string) => {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+        throw new Error("User not found");
+    }
+    const bookingExists = await Booking.findById(bookingId);
+    if (!bookingExists) {
+        throw new Error("Booking not found");
+    }
+    if (bookingExists.status !== 'cancelRequest') {
+        throw new Error("Cannot cancel a booking without a cancel request")
+    }
+  
+    const cancelBooking = await Booking.findByIdAndUpdate(bookingExists._id, {
+        status: "cancelled"
+    }, { new: true });
+    return cancelBooking;
 }
 
 /* 

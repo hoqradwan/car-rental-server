@@ -2,7 +2,7 @@ import { Response } from "express";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { CustomRequest } from "../../utils/CustomRequest";
-import { addBookingIntoDB, cancelRequestIntoDB, getAllBookingsFromDB, getMyBookingsFromDB } from "./booking.service";
+import { addBookingIntoDB, cancelBookingIntoDB, cancelRequestForBookingIntoDB, getAllBookingsFromDB, getMyBookingsFromDB } from "./booking.service";
 
 export const createBooking = catchAsync(async (req: CustomRequest, res: Response) => {
     console.log(req.body.driverLicense)
@@ -36,14 +36,25 @@ export const allBookings = catchAsync(async (req: CustomRequest, res: Response) 
         data: result, // Replace with actual booking data if available
     });
 })
-export const cancelRequest = catchAsync(async (req: CustomRequest, res: Response) => {
+export const cancelRequestForBooking = catchAsync(async (req: CustomRequest, res: Response) => {
     const { id: userId } = req.user; // Extract user ID from the request
     const {bookingId} = req.params;
-    const result = await cancelRequestIntoDB(userId,bookingId); // Call service to add booking into DB
+    const result = await cancelRequestForBookingIntoDB(userId,bookingId); // Call service to add booking into DB
     sendResponse(res, {
         statusCode: 200,
         success: true,
         message: "Cancel request for booking sent successfully",
+        data: result, // Replace with actual booking data if available
+    });
+})
+export const cancelBooking = catchAsync(async (req: CustomRequest, res: Response) => {
+    const { id: userId } = req.user; // Extract user ID from the request
+    const {bookingId} = req.params;
+    const result = await cancelBookingIntoDB(userId,bookingId); // Call service to add booking into DB
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Booking cancelled successfully",
         data: result, // Replace with actual booking data if available
     });
 })
