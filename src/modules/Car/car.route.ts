@@ -23,7 +23,7 @@ router.post(
     adminMiddleware("admin", "employee"),
     changeCarStatus);
 router.post(
-    "/setCarLocation/:carId",
+    "/carLocation/:carId",
     adminMiddleware("admin", "employee"),
     setCarLocationToTrack);
 

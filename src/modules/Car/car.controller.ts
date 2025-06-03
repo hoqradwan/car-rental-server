@@ -1,7 +1,6 @@
 import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import { CustomRequest } from "../../utils/CustomRequest";
-import sendError from "../../utils/sendError";
 import sendResponse from "../../utils/sendResponse";
 import { addCarIntoDB, getCarsFromDB, deleteCarFromDB, changeCarStatusIntoDB } from "./car.service";
 import { UserModel } from "../user/user.model";
@@ -19,7 +18,6 @@ export const addCar = catchAsync(async (req: CustomRequest, res) => {
         data: result,
     })
 })
-
 export const getCars = catchAsync(async (req: CustomRequest, res) => {
     const { id: userId } = req.user;
     const carData = req.query;
@@ -54,7 +52,6 @@ export const changeCarStatus = catchAsync(async (req: CustomRequest, res) => {
         data: cars,
     })
 })
-
 export const setCarLocationToTrack = catchAsync(async (req: CustomRequest, res: Response) => {
   const { lat, lng } = req.body;  // Ensure that lat and lng are passed correctly in the body
   const { id: userId } = req.user;  // Get user ID from the authenticated user
@@ -78,4 +75,30 @@ export const setCarLocationToTrack = catchAsync(async (req: CustomRequest, res: 
     message: "Car location updated successfully.",
     data: result,
   });
-});
+})
+
+
+/* 
+{
+  "make": "Toyota",
+  "model": "Corolla",
+  "color": "Blue",
+  "licensePlate": "ABC1234",
+  "vin": "1HGBH41JXMN109186",
+  "doors": 4,
+  "camera": 1,
+  "bluetooth": 1,
+  "description": "A reliable and fuel-efficient car, perfect for city driving.",
+  "price": 25000,
+  "seats": 5,
+  "tax": 150,
+  "status": "available",
+  "location": {
+    "type": "Point",
+    "coordinates": [-73.935242, 40.730610],
+    "updatedAt": "2025-05-20T12:00:00.000Z"
+  }
+}
+
+
+*/
