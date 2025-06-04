@@ -10,7 +10,6 @@ export const addCarIntoDB = async (userId: string, carData: ICar, image: string)
     const result = await Car.create({ ...carData, image })
     return result;
 }
-
 export const getCarsFromDB = async (userId: string, carData: Partial<ICar>) => {
     const user = await UserModel.findById(userId);
     if (!user) {
@@ -32,7 +31,6 @@ export const getCarsFromDB = async (userId: string, carData: Partial<ICar>) => {
         return cars;
     }
 }
-
 export const deleteCarFromDB = async (userId: string, carId: string) => {
     const user = await UserModel.findById(userId);
     if (!user) {
@@ -69,9 +67,8 @@ export const changeCarStatusIntoDB = async (userId: string, carId: string, statu
     }
     return updateCar
 }
+
 /*
-
-
 {
   "make": "Toyota",
   "model": "Premio",
@@ -87,5 +84,4 @@ export const changeCarStatusIntoDB = async (userId: string, carId: string, statu
   "tax": 150,
   "status": "available"
 }
-
 */

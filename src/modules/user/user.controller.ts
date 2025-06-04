@@ -33,6 +33,7 @@ import {
 import { emitNotification } from "../../utils/socket";
 import httpStatus from "http-status";
 import { CustomRequest } from "../../utils/CustomRequest";
+import { ObjectId } from "mongoose";
 
 export const registerUser = catchAsync(async (req: Request, res: Response) => {
   const { firstName, lastName, email, password, confirmPassword, role } = req.body;
@@ -326,7 +327,7 @@ export const verifyOTP = catchAsync(async (req: Request, res: Response) => {
   const adminMsg = `${firstName} has successfully registered.`;
 
   await emitNotification({
-    userId: createdUser._id as string,
+    userId: createdUser._id as ObjectId,
     userMsg,
     adminMsg,
   });
