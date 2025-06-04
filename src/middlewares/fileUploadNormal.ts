@@ -63,7 +63,6 @@ const fileFilter = (
 ) => {
   let extName = path.extname(file.originalname).toLocaleLowerCase();
   const isAllowedFileType = ALLOWED_FILE_TYPES.includes(extName);
-  console.log("isAllowedFileType: ", isAllowedFileType);
   if (!isAllowedFileType) {
     return cb(createHttpError(400, "File type not allowed"));
   }

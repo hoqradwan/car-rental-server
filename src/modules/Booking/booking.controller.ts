@@ -6,8 +6,9 @@ import { addBookingIntoDB, cancelBookingIntoDB, cancelRequestForBookingIntoDB, g
 
 export const createBooking = catchAsync(async (req: CustomRequest, res: Response) => {
     const { id: userId } = req.user; // Extract user ID from the request
-    const formattedBookingData = JSON.parse(req.body.data); // Parse booking data from request body
-    const result = await addBookingIntoDB(userId, formattedBookingData, req.body.driverLicense); // Call service to add booking into DB
+    // solved after receiving req.body.data and then formatting it. then accessing the objects inside data object bookingData paymentData
+    const formattedData = JSON.parse(req.body.data); // Parse booking data from request body
+    const result = await addBookingIntoDB(userId, formattedData.bookingData, formattedData.paymentData, req.body.driverLicense); // Call service to add booking into DB
     sendResponse(res, {
         statusCode: 200,
         success: true,
