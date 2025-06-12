@@ -210,7 +210,7 @@ export const addManualBookingIntoDB = async (
         if (!createdBooking || createdBooking.length === 0) {
             throw new Error('Booking creation failed');
         }
-         await Earning.findOneAndUpdate(
+        await Earning.findOneAndUpdate(
             { status: "admin" },
             { $inc: { totalBalance: discountedPrice } },
             { new: true, upsert: true, session }
@@ -287,18 +287,22 @@ export const cancelBookingIntoDB = async (userId: string, bookingId: string) => 
     if (bookingExists.status !== 'cancelRequest') {
         throw new Error("Cannot cancel a booking without a cancel request")
     }
-    const car = await Car.findByIdAndUpdate(bookingExists.car,
+    await Car.findByIdAndUpdate(bookingExists.car,
         { status: "available" },
         { new: true }
     )
     const cancelBooking = await Booking.findByIdAndUpdate(bookingExists._id, {
         status: "cancelled"
     }, { new: true });
-     await Earning.findOneAndUpdate(
+    const earning = await Earning.findOne({ type: "admin" });
+    if (earning && earning.totalBalance > 0) {
+        await Earning.findOneAndUpdate(
             { status: "admin" },
             { $inc: { totalBalance: -bookingExists.totalPrice } },
             { new: true, upsert: true }
         );
+    }
+
     return cancelBooking;
 }
 export const cancelManualBookingIntoDB = async (userId: string, bookingId: string) => {
@@ -324,11 +328,15 @@ export const cancelManualBookingIntoDB = async (userId: string, bookingId: strin
     const cancelBooking = await Booking.findByIdAndUpdate(bookingExists._id, {
         status: "cancelled"
     }, { new: true });
-       await Earning.findOneAndUpdate(
+    const earning = await Earning.findOne({ type: "admin" });
+    if (earning && earning.totalBalance > 0) {
+        await Earning.findOneAndUpdate(
             { status: "admin" },
             { $inc: { totalBalance: -bookingExists.totalPrice } },
             { new: true, upsert: true }
         );
+    }
+
     return cancelBooking;
 }
 export const getBookingsByDateFromDB = async (userId: string, date: Date) => {
