@@ -80,6 +80,17 @@ export const cancelBooking = catchAsync(async (req: CustomRequest, res: Response
         data: result, // Replace with actual booking data if available
     });
 })
+export const cancelManualBooking = catchAsync(async (req: CustomRequest, res: Response) => {
+    const { id: userId } = req.user; // Extract user ID from the request
+    const {bookingId} = req.params;
+    const result = await cancelBookingIntoDB(userId,bookingId); // Call service to add booking into DB
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Booking cancelled successfully",
+        data: result, // Replace with actual booking data if available
+    });
+})
 export const getBookingsByDate = catchAsync(async (req: CustomRequest, res: Response) => {
     const { id: userId } = req.user; // Extract user ID from the request
     const date = new Date(req.body.date);

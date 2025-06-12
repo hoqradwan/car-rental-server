@@ -276,7 +276,10 @@ export const cancelBookingIntoDB = async (userId: string, bookingId: string) => 
     if (bookingExists.status !== 'cancelRequest') {
         throw new Error("Cannot cancel a booking without a cancel request")
     }
-
+    const car = await Car.findByIdAndUpdate(bookingExists.car,
+        {status : "available"},
+        {new: true}
+    )
     const cancelBooking = await Booking.findByIdAndUpdate(bookingExists._id, {
         status: "cancelled"
     }, { new: true });
