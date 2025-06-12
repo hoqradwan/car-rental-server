@@ -2,7 +2,7 @@ import { Response } from "express";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { CustomRequest } from "../../utils/CustomRequest";
-import { addBookingIntoDB, addManualBookingIntoDB, cancelBookingIntoDB, cancelRequestForBookingIntoDB, getAllBookingsFromDB, getAllManualBookingsFromDB, getBookingsByDateFromDB, getMyBookingsFromDB } from "./booking.service";
+import { addBookingIntoDB, addManualBookingIntoDB, cancelBookingIntoDB, cancelManualBookingIntoDB, cancelRequestForBookingIntoDB, getAllBookingsFromDB, getAllManualBookingsFromDB, getBookingsByDateFromDB, getMyBookingsFromDB } from "./booking.service";
 
 export const createBooking = catchAsync(async (req: CustomRequest, res: Response) => {
     const { id: userId } = req.user; // Extract user ID from the request
@@ -25,7 +25,7 @@ export const createManualBooking = catchAsync(async (req: CustomRequest, res: Re
         statusCode: 200,
         success: true,
         message: "Manual booking created successfully",
-        data: result, 
+        data: result,
     });
 })
 export const myBookings = catchAsync(async (req: CustomRequest, res: Response) => {
@@ -45,7 +45,7 @@ export const allManualBookings = catchAsync(async (req: CustomRequest, res: Resp
         statusCode: 200,
         success: true,
         message: "All manual Bookings retrieved successfully",
-        data: result, 
+        data: result,
     });
 })
 export const allBookings = catchAsync(async (req: CustomRequest, res: Response) => {
@@ -60,8 +60,8 @@ export const allBookings = catchAsync(async (req: CustomRequest, res: Response) 
 })
 export const cancelRequestForBooking = catchAsync(async (req: CustomRequest, res: Response) => {
     const { id: userId } = req.user; // Extract user ID from the request
-    const {bookingId} = req.params;
-    const result = await cancelRequestForBookingIntoDB(userId,bookingId); // Call service to add booking into DB
+    const { bookingId } = req.params;
+    const result = await cancelRequestForBookingIntoDB(userId, bookingId); // Call service to add booking into DB
     sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -71,8 +71,8 @@ export const cancelRequestForBooking = catchAsync(async (req: CustomRequest, res
 })
 export const cancelBooking = catchAsync(async (req: CustomRequest, res: Response) => {
     const { id: userId } = req.user; // Extract user ID from the request
-    const {bookingId} = req.params;
-    const result = await cancelBookingIntoDB(userId,bookingId); // Call service to add booking into DB
+    const { bookingId } = req.params;
+    const result = await cancelBookingIntoDB(userId, bookingId); // Call service to add booking into DB
     sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -82,12 +82,12 @@ export const cancelBooking = catchAsync(async (req: CustomRequest, res: Response
 })
 export const cancelManualBooking = catchAsync(async (req: CustomRequest, res: Response) => {
     const { id: userId } = req.user; // Extract user ID from the request
-    const {bookingId} = req.params;
-    const result = await cancelBookingIntoDB(userId,bookingId); // Call service to add booking into DB
+    const { bookingId } = req.params;
+    const result = await cancelManualBookingIntoDB(userId, bookingId); // Call service to add booking into DB
     sendResponse(res, {
         statusCode: 200,
         success: true,
-        message: "Booking cancelled successfully",
+        message: "Manual booking cancelled successfully",
         data: result, // Replace with actual booking data if available
     });
 })

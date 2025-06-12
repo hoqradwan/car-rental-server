@@ -17,7 +17,7 @@ router.post(
     createManualBooking
 );
 router.post(
-    "/cancelManualBooking",
+    "/cancelManualBooking/:bookingId",
     adminMiddleware("admin", "employee"),
     cancelManualBooking
 );

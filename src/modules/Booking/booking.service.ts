@@ -31,7 +31,7 @@ export const addBookingIntoDB = async (
         if (carExists.status !== 'available') {
             throw new Error('Car is not available for booking');
         }
-       await Car.findByIdAndUpdate(
+        await Car.findByIdAndUpdate(
             carExists._id,
             { status: "rented" },
             { new: true }
@@ -81,7 +81,7 @@ export const addBookingIntoDB = async (
             dob: user.dob || dob,
             driverLicense,
             licenseNo,
-            bookingType : "online",
+            bookingType: "online",
             status: 'booked',
         };
         // Create the booking
@@ -145,7 +145,7 @@ export const addManualBookingIntoDB = async (
         if (carExists.status !== 'available') {
             throw new Error('Car is not available for booking');
         }
-         await Car.findByIdAndUpdate(
+        await Car.findByIdAndUpdate(
             carExists._id,
             { status: "rented" },
             { new: true }
@@ -193,9 +193,9 @@ export const addManualBookingIntoDB = async (
             address: user.address || address, // Use user's address if available
             phone: user.phone || phone, // Use user's phone if available
             dob: user.dob || dob,
-            driverLicense : "abc",
+            driverLicense: "abc",
             licenseNo,
-            bookingType : "manual",
+            bookingType: "manual",
             status: 'ongoing',
         };
         // Create the booking
@@ -240,7 +240,7 @@ export const getAllManualBookingsFromDB = async (userId: string) => {
     if (!user) {
         throw new Error("User not found");
     }
-    const bookings = await Booking.find({bookingType:"manual"});
+    const bookings = await Booking.find({ bookingType: "manual" });
     return bookings;
 }
 export const cancelRequestForBookingIntoDB = async (userId: string, bookingId: string) => {
@@ -277,8 +277,33 @@ export const cancelBookingIntoDB = async (userId: string, bookingId: string) => 
         throw new Error("Cannot cancel a booking without a cancel request")
     }
     const car = await Car.findByIdAndUpdate(bookingExists.car,
-        {status : "available"},
-        {new: true}
+        { status: "available" },
+        { new: true }
+    )
+    const cancelBooking = await Booking.findByIdAndUpdate(bookingExists._id, {
+        status: "cancelled"
+    }, { new: true });
+    return cancelBooking;
+}
+export const cancelManualBookingIntoDB = async (userId: string, bookingId: string) => {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+        throw new Error("User not found");
+    }
+    const bookingExists = await Booking.findById(bookingId);
+    if (!bookingExists) {
+        throw new Error("Booking not found");
+    }
+    if (bookingExists.status !== 'ongoing') {
+        throw new Error("Cannot cancel a booking which is not ongoing")
+    }
+    if (bookingExists.bookingType !== "manual") {
+        throw new Error("The booking is not manual")
+    }
+    await Car.findByIdAndUpdate(
+        bookingExists.car,
+        { status: "available" },
+        { new: true }
     )
     const cancelBooking = await Booking.findByIdAndUpdate(bookingExists._id, {
         status: "cancelled"
