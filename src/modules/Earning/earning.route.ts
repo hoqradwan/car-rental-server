@@ -1,7 +1,8 @@
 import express from "express";
 import { adminMiddleware } from "../../middlewares/auth";
-import { getOverview } from "./earning.controller";
+import { createDashboard, getOverview } from "./earning.controller";
 const router = express.Router();
-router.get('/overview',adminMiddleware("admin"),getOverview)
+router.get('/overview',adminMiddleware("admin"),getOverview);
+router.post('/',adminMiddleware("admin"),createDashboard);
 
-export const EarningRoutes = router;
+export const DashboardRoutes = router;
