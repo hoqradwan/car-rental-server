@@ -5,6 +5,8 @@ import { PaymentModel } from "../payment/payment.model";
 import { UserModel } from "../user/user.model";
 import { IBooking } from "./booking.interface";
 import { Booking } from "./booking.model";
+import { Earning } from "../Earning/earning.model";
+import { inc } from "semver";
 export const addBookingIntoDB = async (
     userId: string,
     bookingData: IBooking,
@@ -105,7 +107,12 @@ export const addBookingIntoDB = async (
         if (!createdPayment || createdPayment.length === 0) {
             throw new Error('Payment creation failed');
         }
-
+        // Update the admin's total balance in Earning
+        await Earning.findOneAndUpdate(
+            { status: "admin" },
+            { $inc: { totalBalance: discountedPrice } },
+            { new: true, upsert: true, session }
+        );
         // Commit the transaction
         await session.commitTransaction();
         session.endSession();
@@ -203,7 +210,11 @@ export const addManualBookingIntoDB = async (
         if (!createdBooking || createdBooking.length === 0) {
             throw new Error('Booking creation failed');
         }
-
+         await Earning.findOneAndUpdate(
+            { status: "admin" },
+            { $inc: { totalBalance: discountedPrice } },
+            { new: true, upsert: true, session }
+        );
         // Commit the transaction
         await session.commitTransaction();
         session.endSession();
@@ -283,6 +294,11 @@ export const cancelBookingIntoDB = async (userId: string, bookingId: string) => 
     const cancelBooking = await Booking.findByIdAndUpdate(bookingExists._id, {
         status: "cancelled"
     }, { new: true });
+     await Earning.findOneAndUpdate(
+            { status: "admin" },
+            { $inc: { totalBalance: -bookingExists.totalPrice } },
+            { new: true, upsert: true }
+        );
     return cancelBooking;
 }
 export const cancelManualBookingIntoDB = async (userId: string, bookingId: string) => {
@@ -308,6 +324,11 @@ export const cancelManualBookingIntoDB = async (userId: string, bookingId: strin
     const cancelBooking = await Booking.findByIdAndUpdate(bookingExists._id, {
         status: "cancelled"
     }, { new: true });
+       await Earning.findOneAndUpdate(
+            { status: "admin" },
+            { $inc: { totalBalance: -bookingExists.totalPrice } },
+            { new: true, upsert: true }
+        );
     return cancelBooking;
 }
 export const getBookingsByDateFromDB = async (userId: string, date: Date) => {

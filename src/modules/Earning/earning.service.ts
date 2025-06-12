@@ -21,7 +21,6 @@ export const getOverviewFromDB = async (userId: string) => {
     const totalScheduledPickups = await Booking.find({
         car: { $in: await Car.find({ status: '' }).distinct('_id') },  // Find rented cars
         pickupDate: { $gte: new Date() }, // Pickup date is in the future
-        status: 'booked' // Status is 'booked', indicating the booking is made but not yet picked up
     }).countDocuments();
 
     // Get total earnings (admin's balance)
