@@ -81,6 +81,123 @@ export const addBookingIntoDB = async (
             dob: user.dob || dob,
             driverLicense,
             licenseNo,
+            bookingType : "online",
+            status: 'booked',
+        };
+        // Create the booking
+        const createdBooking = await Booking.create([booking], { session });
+        if (!createdBooking || createdBooking.length === 0) {
+            throw new Error('Booking creation failed');
+        }
+
+        // Create the payment data
+        const payment = {
+            transactionId: paymentData.transactionId,
+            user: userId,
+            amount: discountedPrice,
+            paymentData: paymentData.paymentData,
+            status: 'completed', // Assuming the payment is successful
+            isDeleted: false,
+        };
+
+        // Create the payment record
+        const createdPayment = await PaymentModel.create([payment], { session });
+        if (!createdPayment || createdPayment.length === 0) {
+            throw new Error('Payment creation failed');
+        }
+
+        // Commit the transaction
+        await session.commitTransaction();
+        session.endSession();
+
+        return {
+            booking: createdBooking[0],
+            payment: createdPayment[0],
+        };
+    } catch (error: any) {
+        // Abort the transaction in case of an error
+        await session.abortTransaction();
+        session.endSession();
+        throw new Error(`Transaction failed: ${error?.message}`);
+    }
+};
+export const addManualBookingIntoDB = async (
+    userId: string,
+    bookingData: IBooking,
+    paymentData: IPayment, // Added payment data
+    driverLicense: string,
+) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const { car, pickupDate, returnDate, address, phone, dob, licenseNo } = bookingData;
+
+        // Fetch User and Car
+        const user = await UserModel.findById(userId).session(session);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const carExists = await Car.findById(car).session(session);
+        if (!carExists) {
+            throw new Error('Car not found');
+        }
+
+        if (carExists.status !== 'available') {
+            throw new Error('Car is not available for booking');
+        }
+        const updateCarStatus = await Car.findByIdAndUpdate(
+            carExists._id,
+            { status: "rented" },
+            { new: true }
+        )
+        // Date validation
+        const pickup = new Date(pickupDate);
+        const returnD = new Date(returnDate);
+
+        if (pickup < new Date()) {
+            throw new Error('Pickup date cannot be in the past');
+        }
+
+        if (pickup.getTime() === returnD.getTime()) {
+            throw new Error('Pickup date cannot be the same as return date');
+        }
+
+        if (pickup >= returnD) {
+            throw new Error('Pickup date must be before return date');
+        }
+
+        // Calculate the number of days between pickupDate and returnDate
+        const timeDiff = returnD.getTime() - pickup.getTime(); // time difference in milliseconds
+        const dayDiff = timeDiff / (1000 * 3600 * 24); // convert milliseconds to days
+
+        if (isNaN(dayDiff) || dayDiff <= 0) {
+            throw new Error('Invalid booking duration');
+        }
+
+        // Calculate the total price (daily price * number of days)
+        let totalPrice = carExists.price * dayDiff;
+
+        // Apply discount if the booking is 7 days or more
+        let discountedPrice = totalPrice;
+        if (dayDiff >= 7) {
+            discountedPrice = totalPrice - (totalPrice * 0.1); // 10% discount
+        }
+
+        // Prepare the booking data
+        const booking = {
+            user: userId,
+            car,
+            pickupDate,
+            returnDate,
+            totalPrice: discountedPrice,
+            address: user.address || address, // Use user's address if available
+            phone: user.phone || phone, // Use user's phone if available
+            dob: user.dob || dob,
+            driverLicense,
+            licenseNo,
+            bookingType : "online",
             status: 'booked',
         };
         // Create the booking

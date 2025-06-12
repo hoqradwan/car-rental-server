@@ -10,6 +10,7 @@ export interface IBooking extends Document {
     phone: string;
     dob: Date;
     driverLicense: string;
+    bookingType : "online" | "manual";
     licenseNo: string;
     status: "booked" | "ongoing" | "cancelled" | "cancelRequest" | "completed";
 }

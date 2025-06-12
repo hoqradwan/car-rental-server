@@ -2,13 +2,25 @@ import { Response } from "express";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { CustomRequest } from "../../utils/CustomRequest";
-import { addBookingIntoDB, cancelBookingIntoDB, cancelRequestForBookingIntoDB, getAllBookingsFromDB, getBookingsByDateFromDB, getMyBookingsFromDB } from "./booking.service";
+import { addBookingIntoDB, addManualBookingIntoDB, cancelBookingIntoDB, cancelRequestForBookingIntoDB, getAllBookingsFromDB, getBookingsByDateFromDB, getMyBookingsFromDB } from "./booking.service";
 
 export const createBooking = catchAsync(async (req: CustomRequest, res: Response) => {
     const { id: userId } = req.user; // Extract user ID from the request
     // solved after receiving req.body.data and then formatting it. then accessing the objects inside data object bookingData paymentData
     const formattedData = JSON.parse(req.body.data); // Parse booking data from request body
     const result = await addBookingIntoDB(userId, formattedData.bookingData, formattedData.paymentData, req.body.driverLicense); // Call service to add booking into DB
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Booking created successfully",
+        data: result, // Replace with actual booking data if available
+    });
+})
+export const createManualBooking = catchAsync(async (req: CustomRequest, res: Response) => {
+    const { id: userId } = req.user; // Extract user ID from the request
+    // solved after receiving req.body.data and then formatting it. then accessing the objects inside data object bookingData paymentData
+    const formattedData = JSON.parse(req.body.data); // Parse booking data from request body
+    const result = await addManualBookingIntoDB(userId, formattedData.bookingData, formattedData.paymentData, req.body.driverLicense); // Call service to add booking into DB
     sendResponse(res, {
         statusCode: 200,
         success: true,

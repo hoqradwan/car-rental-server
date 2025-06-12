@@ -12,12 +12,13 @@ const BookingSchema = new Schema<IBooking>({
     dob: { type: Date, required: true },
     driverLicense: { type: String, required: true },
     licenseNo: { type: String, required: true },
-    status: { 
-        type: String, 
-        required: true, 
-        enum: ['booked', 'ongoing', 'completed','cancelRequest', 'cancelled'] 
+    bookingType: { type: String, enum: ["online", "manual"], required: true, default: "online" },
+    status: {
+        type: String,
+        required: true,
+        enum: ['booked', 'ongoing', 'completed', 'cancelRequest', 'cancelled']
     },
-},{
+}, {
     timestamps: true,
 });
 
