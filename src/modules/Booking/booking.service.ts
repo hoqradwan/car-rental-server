@@ -31,7 +31,7 @@ export const addBookingIntoDB = async (
         if (carExists.status !== 'available') {
             throw new Error('Car is not available for booking');
         }
-        const updateCarStatus = await Car.findByIdAndUpdate(
+       await Car.findByIdAndUpdate(
             carExists._id,
             { status: "rented" },
             { new: true }
@@ -124,8 +124,6 @@ export const addBookingIntoDB = async (
 export const addManualBookingIntoDB = async (
     userId: string,
     bookingData: IBooking,
-    paymentData: IPayment, // Added payment data
-    driverLicense: string,
 ) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -147,7 +145,7 @@ export const addManualBookingIntoDB = async (
         if (carExists.status !== 'available') {
             throw new Error('Car is not available for booking');
         }
-        const updateCarStatus = await Car.findByIdAndUpdate(
+         await Car.findByIdAndUpdate(
             carExists._id,
             { status: "rented" },
             { new: true }
@@ -195,31 +193,15 @@ export const addManualBookingIntoDB = async (
             address: user.address || address, // Use user's address if available
             phone: user.phone || phone, // Use user's phone if available
             dob: user.dob || dob,
-            driverLicense,
+            driverLicense : "abc",
             licenseNo,
-            bookingType : "online",
-            status: 'booked',
+            bookingType : "manual",
+            status: 'ongoing',
         };
         // Create the booking
         const createdBooking = await Booking.create([booking], { session });
         if (!createdBooking || createdBooking.length === 0) {
             throw new Error('Booking creation failed');
-        }
-
-        // Create the payment data
-        const payment = {
-            transactionId: paymentData.transactionId,
-            user: userId,
-            amount: discountedPrice,
-            paymentData: paymentData.paymentData,
-            status: 'completed', // Assuming the payment is successful
-            isDeleted: false,
-        };
-
-        // Create the payment record
-        const createdPayment = await PaymentModel.create([payment], { session });
-        if (!createdPayment || createdPayment.length === 0) {
-            throw new Error('Payment creation failed');
         }
 
         // Commit the transaction
@@ -228,7 +210,6 @@ export const addManualBookingIntoDB = async (
 
         return {
             booking: createdBooking[0],
-            payment: createdPayment[0],
         };
     } catch (error: any) {
         // Abort the transaction in case of an error
@@ -237,84 +218,6 @@ export const addManualBookingIntoDB = async (
         throw new Error(`Transaction failed: ${error?.message}`);
     }
 };
-
-
-/* 
-{
-  "bookingData": {
-    "car": "683fc96986375458cf50f750", 
-    "pickupDate": "2025-06-10T10:00:00Z", 
-    "returnDate": "2025-06-17T10:00:00Z", 
-    "address": "123 Main St, Dhaka", 
-    "phone": "+8801712345678", 
-    "dob": "1995-04-25T00:00:00Z", 
-    "licenseNo": "A1234567", 
-  },
-  "paymentData": {
-    "transactionId": "txn_1234567890", 
-    "amount": 500, 
-    "paymentData": {
-      "paymentMethod": "Credit Card", 
-      "transactionDetails": "Successful payment"
-    }, 
-  }
-}
-
-*/
-
-// export const addBookingIntoDB = async (userId: string, bookingData: IBooking, driverLicense: string) => {
-//     const { car, pickupDate, returnDate, totalPrice, address, phone, dob, licenseNo } = bookingData;
-
-//     const user = await UserModel.findById(userId);
-//     if (!user) {
-//         throw new Error("User not found");
-//     }
-//     const carExists = await Car.findById(car);
-//     if (!carExists) {
-//         throw new Error("Car not found");
-//     }
-//     if (carExists.status !== "available") {
-//         throw new Error("Car is not available for booking");
-//     }
-//     if (pickupDate < new Date()) {
-//         throw new Error("Pickup date cannot be in the past");
-//     }
-//     if (pickupDate === returnDate) {
-//         throw new Error("Pickup date cannot be the same as return date");
-//     }
-//     if (new Date(pickupDate) >= new Date(returnDate)) {
-//         throw new Error("Pickup date must be before return date");
-//     }
-
-//     // Calculate the number of days between pickupDate and returnDate
-//     const pickup = new Date(pickupDate);
-//     const returnD = new Date(returnDate);
-//     const timeDiff = returnD.getTime() - pickup.getTime(); // time difference in milliseconds
-//     const dayDiff = timeDiff / (1000 * 3600 * 24); // convert milliseconds to days
-
-//     // Apply discount if the booking is 7 days or more
-//     let discountedPrice = totalPrice;
-//     if (dayDiff >= 7) {
-//         discountedPrice = totalPrice - (totalPrice * 0.1); // 10% discount
-//     }
-
-//     const booking = {
-//         user: userId,
-//         car,
-//         pickupDate,
-//         returnDate,
-//         totalPrice: discountedPrice,
-//         address: user.address || address, // Use user's address if available
-//         phone: user.phone || phone, // Use user's phone if available
-//         dob: user.dob || dob,
-//         driverLicense: driverLicense,
-//         licenseNo,
-//         status: "booked",
-//     };
-//     const result = await Booking.create(booking);
-//     return result;
-// }
-
 
 export const getMyBookingsFromDB = async (userId: string) => {
     const user = await UserModel.findById(userId);
@@ -330,6 +233,14 @@ export const getAllBookingsFromDB = async (userId: string) => {
         throw new Error("User not found");
     }
     const bookings = await Booking.find();
+    return bookings;
+}
+export const getAllManualBookingsFromDB = async (userId: string) => {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+        throw new Error("User not found");
+    }
+    const bookings = await Booking.find({bookingType:"manual"});
     return bookings;
 }
 export const cancelRequestForBookingIntoDB = async (userId: string, bookingId: string) => {
