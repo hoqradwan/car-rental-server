@@ -6,7 +6,6 @@ import { UserModel } from "../user/user.model";
 import { IBooking } from "./booking.interface";
 import { Booking } from "./booking.model";
 import { Earning } from "../Earning/earning.model";
-import { inc } from "semver";
 export const addBookingIntoDB = async (
     userId: string,
     bookingData: IBooking,
@@ -218,7 +217,6 @@ export const addManualBookingIntoDB = async (
         // Commit the transaction
         await session.commitTransaction();
         session.endSession();
-
         return {
             booking: createdBooking[0],
         };
@@ -355,7 +353,6 @@ export const getBookingsByDateFromDB = async (userId: string, date: Date) => {
         returnDate: { $gte: startOfDay },
     }).exec();
     return bookings;
-
 }
 
 

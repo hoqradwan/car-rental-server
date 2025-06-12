@@ -29,7 +29,6 @@ export const initSocketIO = async (server: HttpServer): Promise<void> => {
 
     // Listen for messages from the client
     socket.on("clientMessage", (message: string) => {
-      console.log("Message received from client:", message);
 
       // Optionally, send a response back to the client
       socket.emit("serverMessage", `Server received: ${message}`);
