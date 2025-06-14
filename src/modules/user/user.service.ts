@@ -32,7 +32,6 @@ export const createUser = async ({
     email,
     password: hashedPassword,
   });
-  console.log("Created User:", createdUser);
   await UserProfile.create({
     user: createdUser._id,
   })
