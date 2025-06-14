@@ -183,7 +183,7 @@ export const forgotPassword = catchAsync(
       });
     }
 
-    const user = await UserModel.findOne(email);
+    const user = await UserModel.findOne({email});
     if (!user) {
       return sendError(res, httpStatus.NOT_FOUND, {
         message: "This account does not exist.",
